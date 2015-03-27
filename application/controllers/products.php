@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class Folders extends CI_Controller {
+class Products extends CI_Controller {
 	
 	public function respond($http_response_code,$message){
 		header("Content-Type: application/json");
@@ -12,72 +12,87 @@ class Folders extends CI_Controller {
 	public function index(){
 		
 		$request_type=$_SERVER['REQUEST_METHOD'];
-		$folder_id=$this->uri->segment(2,0);
+		$product_id=$this->uri->segment(2,0);
 		
 		header('Content-Type: application/json');
 		if($request_type=='POST'){
-			if($folder_id==0)
-				$this->new_folder();
+			if($product_id==0)
+				$this->new_product();
 			else{
 				
 			}
 		}
 		else if($request_type=='GET'){
-			if($folder_id>0){
-				$this->get_folder($folder_id);
+			if($product_id>0){
+				$this->get_product($product_id);
 			}
 		}
 	}
-	private function new_folder(){
+	private function new_product(){
 		
 		$name=$this->input->post('name');
+		$type=$this->input->post('type');
+		$origin=$this->input->post('origin');
+		$quantity=$this->input->post('quantity');
+		$unit_quantity=$this->input->post('unit_quantity');
+		$unit_price=$this->input->post('unit_price');
+		$unit_price_currency=$this->input->post('unit_price_currency');
 		$token=$this->input->post('token');
 		/*************************/
 		/* Section 1 - Authorize */
 		if(!$token)$this->respond('400',array('error'=>'unauthorized_access'));
-		$status=$this->authorize->client_can('create_folder',$token);
+		$status=$this->authorize->client_can('create_product',$token);
 		if($status!='authorized')$this->respond('400',array('error'=>$status));
 		/*************************/
 		
 		/******************************/
 		/* Section 2 - Validate Input */
 		if(!$name)$this->respond('400',array('error'=>'empty_name'));
+		if(!$type)$this->respond('400',array('error'=>'empty_type'));
+		if(!$origin)$this->respond('400',array('error'=>'empty_origin'));
+		
+		if(!is_numeric($quantity))$this->respond('400',array('error'=>'invalid_quantity'));
+		if(!is_numeric($unit_price))$this->respond('400',array('error'=>'invalid_unit_price'));
+		
+		if(!in_array(strtolower($unit_quantity),array('lbs','kg')))$this->respond('400',array('error'=>'invalid_unit_weight'));
+		if(!in_array(strtolower($unit_price_currency),array('usd','gbp','inr','bdt')))$this->respond('400',array('error'=>'invalid_unit_price_currency'));
 		/******************************/
 		
 		/**********************************/
 		/* Section 3 - Database Operation */
-		$this->db->insert('folders',array('name'=>$name,
-											'description'=>$this->input->post('description')?$this->input->post('description'):''
+		$this->db->insert('products',array('name'=>$name,
+											'type'=>$type,
+											'origin'=>$origin,
+											'quantity'=>$quantity,
+											'unit_quantity'=>$unit_quantity,
+											'unit_price'=>$unit_price,
+											'unit_price_currency'=>$unit_price_currency
 											));
-		$folder_id=$this->db->insert_id();
-		$this->db->insert('tree',array('item_id'=>$folder_id,
-										'item_type'=>'folder',
-										'parent'=>$this->input->post('parent')?$this->input->post('parent'):0
-										));
+		$product_id=$this->db->insert_id();
 		/**********************************/
 		
 		/********************************/
 		/* Section 4 - Prepare Response */
 		$this->db->select('*');
-		$this->db->from('folders');
-		$this->db->where('id',$folder_id);
-		$folder=$this->db->get()->row();
+		$this->db->from('products');
+		$this->db->where('id',$product_id);
+		$product=$this->db->get()->row();
 		/********************************/
 		
 		/*****************************/
 		/* Section 5 - Consume Token */
-		$this->request->dispatch('create_folder',$token);
+		$this->request->dispatch('create_product',$token);
 		/*****************************/
 		
-		$this->respond(201,$folder);
+		$this->respond(201,$product);
 	}
-	private function get_folder($folder_id){
+	private function get_product($product_id){
 		
 		$token=$this->input->get_post('token');
 		/*************************/
 		/* Section 1 - Authorize */
 		if(!$token)$this->respond('400',array('error'=>'unauthorized_access'));
-		$status=$this->authorize->client_can('read_folder',$token);
+		$status=$this->authorize->client_can('read_product',$token);
 		if($status!='authorized')$this->respond('400',array('error'=>$status));
 		/*************************/
 		
@@ -92,17 +107,17 @@ class Folders extends CI_Controller {
 		/********************************/
 		/* Section 4 - Prepare Response */
 		$this->db->select('*');
-		$this->db->from('folders');
-		$this->db->where('id',$folder_id);
-		$folder=$this->db->get()->row();
+		$this->db->from('products');
+		$this->db->where('id',$product_id);
+		$product=$this->db->get()->row();
 		/********************************/
 		
 		/*****************************/
 		/* Section 5 - Consume Token */
-		$this->request->dispatch('read_folder',$token);
+		$this->request->dispatch('read_product',$token);
 		/*****************************/
 		
-		$this->respond(200,$folder);
+		$this->respond(200,$product);
 	}
 	private function skeleton(){
 		

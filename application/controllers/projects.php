@@ -18,8 +18,33 @@ class Projects extends CI_Controller {
 		if($request_type=='POST'){
 			if($project_id==0)
 				$this->new_project();
-			else{
+			else if($project_id>0){
+				$class=$this->uri->segment(3,FALSE);
+				if(!$class)die();
+				if(!in_array($class,array('customer','supplier','product','contract','import_permit','lc')))die();
 				
+				$this->db->select('step');
+				$this->db->from('steps');
+				$this->db->where('entity',$class);
+				$target_step=$this->db->get()->row()->step;
+				
+				$this->db->select('current_step');
+				$this->db->from('projects');
+				$this->db->where('id',$project_id);
+				$current_step=$this->db->get()->row()->current_step;
+				
+				if($target_step<=$current_step){
+					$id=$this->input->post('object_id');
+					if(!$id)$this->respond(400,array('error'=>'no_object_id_provided'));
+					
+					$this->db->select('id');
+					$this->db->from($class.'s');
+					$this->db->where('id',$id);
+					if($this->db->get()->num_rows()==0)$this->respond(400,array('error'=>'object_not_found'));
+					
+					$this->assign($class,$id,$project_id,$current_step);
+				}
+				else $this->respond(400,array('error'=>'slow_down_buddy'));
 			}
 		}
 		else if($request_type=='GET'){
@@ -72,6 +97,30 @@ class Projects extends CI_Controller {
 		/*****************************/
 		
 		$this->respond(201,$project);
+	}
+	private function assign($class,$id,$project_id,$current_step){
+		
+		$this->db->select('id');
+		$this->db->from('tree');
+		$this->db->where('item_type','project');
+		$this->db->where('item_id',$project_id);
+		$parent=$this->db->get()->row()->id;
+		
+		$this->db->select('id');
+		$this->db->from('tree');
+		$this->db->where('item_type',$class);
+		$this->db->where('item_id',$id);
+		$this->db->where('parent',$parent);
+		
+		if($this->db->get()->num_rows()>0)$this->respond(400,array('relationship_already_exists'));
+		
+		$this->db->insert('tree',array('item_type'=>$class,'item_id'=>$id,'parent'=>$parent));
+		
+		$current_step+=1;
+		$this->db->where('id',$project_id);
+		$this->db->update('projects',array('current_step'=>$current_step));
+		$this->respond(201,array('status'=>'relationship_created'));
+		
 	}
 	private function get_project($project_id){
 		

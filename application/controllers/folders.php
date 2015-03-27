@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class Projects extends CI_Controller {
+class folders extends CI_Controller {
 	
 	public function respond($http_response_code,$message){
 		header("Content-Type: application/json");
@@ -12,30 +12,30 @@ class Projects extends CI_Controller {
 	public function index(){
 		
 		$request_type=$_SERVER['REQUEST_METHOD'];
-		$project_id=$this->uri->segment(2,0);
+		$folder_id=$this->uri->segment(2,0);
 		
 		header('Content-Type: application/json');
 		if($request_type=='POST'){
-			if($project_id==0)
-				$this->new_project();
+			if($folder_id==0)
+				$this->new_folder();
 			else{
 				
 			}
 		}
 		else if($request_type=='GET'){
-			if($project_id>0){
-				$this->get_project($project_id);
+			if($folder_id>0){
+				$this->get_folder($folder_id);
 			}
 		}
 	}
-	private function new_project(){
+	private function new_folder(){
 		
 		$name=$this->input->post('name');
 		$token=$this->input->post('token');
 		/*************************/
 		/* Section 1 - Authorize */
 		if(!$token)$this->respond('400',array('error'=>'unauthorized_access'));
-		$status=$this->authorize->client_can('create_project',$token);
+		$status=$this->authorize->client_can('create_folder',$token);
 		if($status!='authorized')$this->respond('400',array('error'=>$status));
 		/*************************/
 		
@@ -46,40 +46,38 @@ class Projects extends CI_Controller {
 		
 		/**********************************/
 		/* Section 3 - Database Operation */
-		$this->db->insert('projects',array( 'name'=>$name,
-											'description'=>$this->input->post('description')?$this->input->post('description'):'',
-											'created_on'=>date('Y-m-d H:i:s'),
-											'last_modified'=>date('Y-m-d H:i:s'),
-											'current_step'=>0));
-		$project_id=$this->db->insert_id();
-		$this->db->insert('tree',array('item_id'=>$project_id,
-										'item_type'=>'project',
-										'parent'=>$this->input->post('parent')?$this->input->post('parent'):1
+		$this->db->insert('folders',array('name'=>$name,
+											'description'=>$this->input->post('description')?$this->input->post('description'):''
+											));
+		$folder_id=$this->db->insert_id();
+		$this->db->insert('tree',array('item_id'=>$folder_id,
+										'item_type'=>'folder',
+										'parent'=>$this->input->post('parent')?$this->input->post('parent'):0
 										));
 		/**********************************/
 		
 		/********************************/
 		/* Section 4 - Prepare Response */
 		$this->db->select('*');
-		$this->db->from('projects');
-		$this->db->where('id',$project_id);
-		$project=$this->db->get()->row();
+		$this->db->from('folders');
+		$this->db->where('id',$folder_id);
+		$folder=$this->db->get()->row();
 		/********************************/
 		
 		/*****************************/
 		/* Section 5 - Consume Token */
-		$this->request->dispatch('create_project',$token);
+		$this->request->dispatch('create_folder',$token);
 		/*****************************/
 		
-		$this->respond(201,$project);
+		$this->respond(201,$folder);
 	}
-	private function get_project($project_id){
+	private function get_folder($folder_id){
 		
 		$token=$this->input->get_post('token');
 		/*************************/
 		/* Section 1 - Authorize */
 		if(!$token)$this->respond('400',array('error'=>'unauthorized_access'));
-		$status=$this->authorize->client_can('read_project',$token);
+		$status=$this->authorize->client_can('read_folder',$token);
 		if($status!='authorized')$this->respond('400',array('error'=>$status));
 		/*************************/
 		
@@ -94,17 +92,17 @@ class Projects extends CI_Controller {
 		/********************************/
 		/* Section 4 - Prepare Response */
 		$this->db->select('*');
-		$this->db->from('projects');
-		$this->db->where('id',$project_id);
-		$project=$this->db->get()->row();
+		$this->db->from('folders');
+		$this->db->where('id',$folder_id);
+		$folder=$this->db->get()->row();
 		/********************************/
 		
 		/*****************************/
 		/* Section 5 - Consume Token */
-		$this->request->dispatch('read_project',$token);
+		$this->request->dispatch('read_folder',$token);
 		/*****************************/
 		
-		$this->respond(200,$project);
+		$this->respond(200,$folder);
 	}
 	private function skeleton(){
 		

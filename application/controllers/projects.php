@@ -109,7 +109,7 @@ class Projects extends CI_Controller {
 		$this->db->select('id');
 		$this->db->from('tree');
 		$this->db->where('item_type',$class);
-		$this->db->where('item_id',$id);
+		//$this->db->where('item_id',$id);
 		$this->db->where('parent',$parent);
 		
 		if($this->db->get()->num_rows()>0)$this->respond(400,array('relationship_already_exists'));

@@ -4,6 +4,7 @@ class Products extends CI_Controller {
 	
 	public function respond($http_response_code,$message){
 		header("Content-Type: application/json");
+		header("Access-Control-Allow-Origin: *");
 		http_response_code($http_response_code);
 		echo json_encode($message);
 		die();

@@ -3,6 +3,7 @@
 class Nodes extends CI_Controller {
 	
 	public function index(){
+		header("Access-Control-Allow-Origin: *");
 		
 		$id=$this->uri->segment(2,FALSE);
 		

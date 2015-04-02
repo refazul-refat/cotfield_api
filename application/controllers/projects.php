@@ -4,6 +4,7 @@ class Projects extends CI_Controller {
 	
 	public function respond($http_response_code,$message){
 		header("Content-Type: application/json");
+		header("Access-Control-Allow-Origin: *");
 		http_response_code($http_response_code);
 		echo json_encode($message);
 		die();
@@ -15,6 +16,7 @@ class Projects extends CI_Controller {
 		$project_id=$this->uri->segment(2,0);
 		
 		header('Content-Type: application/json');
+		header("Access-Control-Allow-Origin: *");
 		if($request_type=='POST'){
 			if($project_id==0)
 				$this->new_project();

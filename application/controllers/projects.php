@@ -3,8 +3,6 @@
 class Projects extends CI_Controller {
 	
 	public function respond($http_response_code,$message){
-		header("Content-Type: application/json");
-		header("Access-Control-Allow-Origin: *");
 		http_response_code($http_response_code);
 		echo json_encode($message);
 		die();
@@ -51,7 +49,26 @@ class Projects extends CI_Controller {
 		}
 		else if($request_type=='GET'){
 			if($project_id>0){
-				$this->get_project($project_id);
+				$class=$this->uri->segment(3,FALSE);
+				if(in_array($class,array('customer','supplier','product','contract','import_permit','lc'))){
+					$this->db->select('id');
+					$this->db->from('tree');
+					$this->db->where('item_type','project');
+					$this->db->where('item_id',$project_id);
+					$parent=$this->db->get()->row()->id;
+					
+					$this->db->select('id');
+					$this->db->from('tree');
+					$this->db->where('item_type',$class);
+					//$this->db->where('item_id',$id);
+					$this->db->where('parent',$parent);
+					
+					$result=$this->db->get()->row();
+						
+					if(count($result)>0)$this->respond(200,array('id'=>$result->id));
+					else $this->respond(400,array('not_found'));
+				}
+				else $this->get_project($project_id);
 			}
 		}
 	}

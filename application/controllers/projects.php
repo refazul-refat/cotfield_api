@@ -57,7 +57,7 @@ class Projects extends CI_Controller {
 					$this->db->where('item_id',$project_id);
 					$parent=$this->db->get()->row()->id;
 					
-					$this->db->select('id');
+					$this->db->select('*');
 					$this->db->from('tree');
 					$this->db->where('item_type',$class);
 					//$this->db->where('item_id',$id);

@@ -3,8 +3,6 @@
 class Customers extends CI_Controller {
 	
 	public function respond($http_response_code,$message){
-		header("Content-Type: application/json");
-		header("Access-Control-Allow-Origin: *");
 		http_response_code($http_response_code);
 		echo json_encode($message);
 		die();
@@ -27,6 +25,9 @@ class Customers extends CI_Controller {
 		else if($request_type=='GET'){
 			if($customer_id>0){
 				$this->get_customer($customer_id);
+			}
+			else{
+				$this->list_customers();
 			}
 		}
 	}
@@ -93,6 +94,37 @@ class Customers extends CI_Controller {
 		$this->db->from('customers');
 		$this->db->where('id',$customer_id);
 		$customer=$this->db->get()->row();
+		/********************************/
+		
+		/*****************************/
+		/* Section 5 - Consume Token */
+		$this->request->dispatch('read_customer',$token);
+		/*****************************/
+		
+		$this->respond(200,$customer);
+	}
+	private function list_customers(){
+		$token=$this->input->get_post('token');
+		/*************************/
+		/* Section 1 - Authorize */
+		if(!$token)$this->respond('400',array('error'=>'unauthorized_access'));
+		$status=$this->authorize->client_can('read_customer',$token);
+		if($status!='authorized')$this->respond('400',array('error'=>$status));
+		/*************************/
+		
+		/******************************/
+		/* Section 2 - Validate Input */
+		/******************************/
+		
+		/**********************************/
+		/* Section 3 - Database Operation */
+		/**********************************/
+		
+		/********************************/
+		/* Section 4 - Prepare Response */
+		$this->db->select('id,name');
+		$this->db->from('customers');
+		$customer=$this->db->get()->result();
 		/********************************/
 		
 		/*****************************/

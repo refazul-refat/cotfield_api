@@ -65,7 +65,7 @@ class Projects extends CI_Controller {
 					
 					$result=$this->db->get()->row();
 						
-					if(count($result)>0)$this->respond(200,array('id'=>$result->id));
+					if(count($result)>0)$this->respond(200,array('id'=>$result->item_id));
 					else $this->respond(400,array('not_found'));
 				}
 				else $this->get_project($project_id);

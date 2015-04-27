@@ -33,7 +33,7 @@ class Suppliers extends CI_Controller {
 	}
 	private function new_supplier(){
 		
-		$name=$this->input->post('name');
+		$name=$this->input->post('supplier_name');
 		$token=$this->input->post('token');
 		/*************************/
 		/* Section 1 - Authorize */
@@ -50,7 +50,7 @@ class Suppliers extends CI_Controller {
 		/**********************************/
 		/* Section 3 - Database Operation */
 		$this->db->insert('suppliers',array('name'=>$name,
-											'description'=>$this->input->post('description')?$this->input->post('description'):''
+											'description'=>$this->input->post('supplier_description')?$this->input->post('supplier_description'):''
 											));
 		$supplier_id=$this->db->insert_id();
 		/**********************************/

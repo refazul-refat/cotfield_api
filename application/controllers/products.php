@@ -31,13 +31,13 @@ class Products extends CI_Controller {
 	}
 	private function new_product(){
 		
-		$name=$this->input->post('name');
-		$type=$this->input->post('type');
-		$origin=$this->input->post('origin');
-		$quantity=$this->input->post('quantity');
-		$unit_quantity=$this->input->post('unit_quantity');
-		$unit_price=$this->input->post('unit_price');
-		$unit_price_currency=$this->input->post('unit_price_currency');
+		$name=$this->input->post('product_name');
+		$type=$this->input->post('product_type');
+		$origin=$this->input->post('product_origin');
+		$quantity=$this->input->post('product_quantity');
+		$unit_quantity=$this->input->post('product_unit_quantity');
+		$unit_price=$this->input->post('product_unit_price');
+		$unit_price_currency=$this->input->post('product_unit_price_currency');
 		$token=$this->input->post('token');
 		/*************************/
 		/* Section 1 - Authorize */

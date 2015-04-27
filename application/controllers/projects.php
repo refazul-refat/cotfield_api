@@ -74,7 +74,7 @@ class Projects extends CI_Controller {
 	}
 	private function new_project(){
 		
-		$name=$this->input->post('name');
+		$name=$this->input->post('project_name');
 		$token=$this->input->post('token');
 		/*************************/
 		/* Section 1 - Authorize */
@@ -91,7 +91,7 @@ class Projects extends CI_Controller {
 		/**********************************/
 		/* Section 3 - Database Operation */
 		$this->db->insert('projects',array( 'name'=>$name,
-											'description'=>$this->input->post('description')?$this->input->post('description'):'',
+											'description'=>$this->input->post('project_description')?$this->input->post('project_description'):'',
 											'created_on'=>date('Y-m-d H:i:s'),
 											'last_modified'=>date('Y-m-d H:i:s'),
 											'current_step'=>0));

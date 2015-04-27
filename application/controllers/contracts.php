@@ -3,8 +3,6 @@
 class Contracts extends CI_Controller {
 	
 	public function respond($http_response_code,$message){
-		header("Content-Type: application/json");
-		header("Access-Control-Allow-Origin: *");
 		http_response_code($http_response_code);
 		echo json_encode($message);
 		die();
@@ -32,11 +30,16 @@ class Contracts extends CI_Controller {
 	}
 	private function new_contract(){
 		
-		$no=$this->input->post('no');
-		$initiate_date=$this->input->post('initiate_date');
-		$agreement_date=$this->input->post('agreement_date');
-		$commission_rate=$this->input->post('commission_rate');
-		$commission_rate_unit=$this->input->post('commission_rate_unit');
+		/*
+		Fields: no,initiate_date,agreement_date,commission_rate,commission_rate_unit,copy
+		*/
+		
+		$contract_no=$this->input->post('contract_no');
+		$contract_initiate_date=$this->input->post('contract_initiate_date');
+		$contract_agreement_date=$this->input->post('contract_agreement_date');
+		$contract_commission_rate=$this->input->post('contract_commission_rate');
+		$contract_commission_rate_unit=$this->input->post('contract_commission_rate_unit');
+		$contract_copy=$this->input->post('contract_copy');
 		$token=$this->input->post('token');
 		/*************************/
 		/* Section 1 - Authorize */
@@ -47,18 +50,19 @@ class Contracts extends CI_Controller {
 		
 		/******************************/
 		/* Section 2 - Validate Input */
-		if(!$no)$this->respond('400',array('error'=>'empty_contract_no'));
-		if(!is_numeric($commission_rate))$this->respond(400,array('error'=>'invalid_commission_rate'));
-		if(!in_array($commission_rate_unit,array('lbs','kg')))$this->respond(400,array('error'=>'invalid_commission_rate_unit'));
+		if(!$contract_no)$this->respond('400',array('error'=>'empty_contract_no'));
+		if(!is_numeric($contract_commission_rate))$this->respond(400,array('error'=>'invalid_commission_rate'));
+		if(!in_array($contract_commission_rate_unit,array('lbs','kg','kgs')))$this->respond(400,array('error'=>'invalid_commission_rate_unit'));
 		/******************************/
 		
 		/**********************************/
 		/* Section 3 - Database Operation */
-		$this->db->insert('contracts',array('no'=>$no,
-											'initiate_date'=>$initiate_date,
-											'agreement_date'=>$agreement_date,
-											'commission_rate'=>$commission_rate,
-											'commission_rate_unit'=>$commission_rate_unit
+		$this->db->insert('contracts',array('no'=>$contract_no,
+											'initiate_date'=>$contract_initiate_date,
+											'agreement_date'=>$contract_agreement_date,
+											'commission_rate'=>$contract_commission_rate,
+											'commission_rate_unit'=>$contract_commission_rate_unit,
+											'copy'=>$contract_copy
 											));
 		$contract_id=$this->db->insert_id();
 		/**********************************/

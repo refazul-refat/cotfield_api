@@ -3,8 +3,6 @@
 class Lcs extends CI_Controller {
 	
 	public function respond($http_response_code,$message){
-		header("Content-Type: application/json");
-		header("Access-Control-Allow-Origin: *");
 		http_response_code($http_response_code);
 		echo json_encode($message);
 		die();
@@ -32,11 +30,11 @@ class Lcs extends CI_Controller {
 	}
 	private function new_lc(){
 		
-		$no=$this->input->post('no');
-		$issue_date=$this->input->post('issue_date');
-		$type=$this->input->post('type');
-		$opening_bank=$this->input->post('opening_bank');
-		$receiving_bank=$this->input->post('receiving_bank');
+		$no=$this->input->post('lc_no');
+		$issue_date=$this->input->post('lc_issue_date');
+		$type=$this->input->post('lc_type');
+		$opening_bank=$this->input->post('lc_opening_bank');
+		$receiving_bank=$this->input->post('lc_receiving_bank');
 		$token=$this->input->post('token');
 		/*************************/
 		/* Section 1 - Authorize */

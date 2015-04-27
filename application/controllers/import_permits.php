@@ -3,8 +3,6 @@
 class Import_permits extends CI_Controller {
 	
 	public function respond($http_response_code,$message){
-		header("Content-Type: application/json");
-		header("Access-Control-Allow-Origin: *");
 		http_response_code($http_response_code);
 		echo json_encode($message);
 		die();
@@ -32,8 +30,8 @@ class Import_permits extends CI_Controller {
 	}
 	private function new_import_permit(){
 		
-		$no=$this->input->post('no');
-		$date=$this->input->post('date');
+		$no=$this->input->post('import_permit_no');
+		$date=$this->input->post('import_permit_date');
 		$token=$this->input->post('token');
 		/*************************/
 		/* Section 1 - Authorize */

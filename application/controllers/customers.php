@@ -33,7 +33,7 @@ class Customers extends CI_Controller {
 	}
 	private function new_customer(){
 		
-		$name=$this->input->post('name');
+		$name=$this->input->post('customer_name');
 		$token=$this->input->post('token');
 		/*************************/
 		/* Section 1 - Authorize */
@@ -50,7 +50,7 @@ class Customers extends CI_Controller {
 		/**********************************/
 		/* Section 3 - Database Operation */
 		$this->db->insert('customers',array('name'=>$name,
-											'description'=>$this->input->post('description')?$this->input->post('description'):''
+											'description'=>$this->input->post('customer_description')?$this->input->post('customer_description'):''
 											));
 		$customer_id=$this->db->insert_id();
 		/**********************************/

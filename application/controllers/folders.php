@@ -3,8 +3,6 @@
 class Folders extends CI_Controller {
 	
 	public function respond($http_response_code,$message){
-		header("Content-Type: application/json");
-		header("Access-Control-Allow-Origin: *");
 		http_response_code($http_response_code);
 		echo json_encode($message);
 		die();
@@ -32,7 +30,7 @@ class Folders extends CI_Controller {
 	}
 	private function new_folder(){
 		
-		$name=$this->input->post('name');
+		$name=$this->input->post('folder_name');
 		$token=$this->input->post('token');
 		/*************************/
 		/* Section 1 - Authorize */
@@ -49,12 +47,12 @@ class Folders extends CI_Controller {
 		/**********************************/
 		/* Section 3 - Database Operation */
 		$this->db->insert('folders',array('name'=>$name,
-											'description'=>$this->input->post('description')?$this->input->post('description'):''
+											'description'=>$this->input->post('folder_description')?$this->input->post('folder_description'):''
 											));
 		$folder_id=$this->db->insert_id();
 		$this->db->insert('tree',array('item_id'=>$folder_id,
 										'item_type'=>'folder',
-										'parent'=>$this->input->post('parent')?$this->input->post('parent'):0
+										'parent'=>$this->input->post('folder_parent')?$this->input->post('folder_parent'):0
 										));
 		/**********************************/
 		

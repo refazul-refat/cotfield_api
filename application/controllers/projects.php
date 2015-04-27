@@ -98,7 +98,7 @@ class Projects extends CI_Controller {
 		$project_id=$this->db->insert_id();
 		$this->db->insert('tree',array('item_id'=>$project_id,
 										'item_type'=>'project',
-										'parent'=>$this->input->post('parent')?$this->input->post('parent'):1
+										'parent'=>$this->input->post('parent')?$this->input->post('parent'):2
 										));
 		/**********************************/
 		

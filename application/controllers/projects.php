@@ -21,7 +21,7 @@ class Projects extends CI_Controller {
 			else if($project_id>0){
 				$class=$this->uri->segment(3,FALSE);
 				if(!$class)die();
-				if(!in_array($class,array('customer','supplier','product','contract','import_permit','lc')))die();
+				if(!in_array($class,array('customer','supplier','product','contract','import_permit','lc','shipment','document','transshipment','port','controller','payment')))die();
 				
 				$this->db->select('step');
 				$this->db->from('steps');
@@ -50,7 +50,7 @@ class Projects extends CI_Controller {
 		else if($request_type=='GET'){
 			if($project_id>0){
 				$class=$this->uri->segment(3,FALSE);
-				if(in_array($class,array('customer','supplier','product','contract','import_permit','lc'))){
+				if(in_array($class,array('customer','supplier','product','contract','import_permit','lc','shipment','document','transshipment','port','controller','payment'))){
 					$this->db->select('id');
 					$this->db->from('tree');
 					$this->db->where('item_type','project');

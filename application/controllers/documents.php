@@ -18,6 +18,13 @@ class Documents extends CI_Controller {
 		if($request_type=='POST'){
 			if($document_id==0){
 				$commercial_invoice=$this->input->post('commercial_invoice');
+				$packing_list=$this->input->post('packing_list');
+				$lading_bill=$this->input->post('lading_bill');
+				$phytosanitary_certificate=$this->input->post('phytosanitary_certificate');
+				$origin_certificate=$this->input->post('origin_certificate');
+				$shipment_advice=$this->input->post('shipment_advice');
+				$controller_letter=$this->input->post('controller_letter');
+				$fumigation_letter=$this->input->post('fumigation_letter');
 				$token=$this->input->post('token');
 				/*************************/
 				/* Section 1 - Authorize */
@@ -32,7 +39,14 @@ class Documents extends CI_Controller {
 		
 				/**********************************/
 				/* Section 3 - Database Operation */
-				$this->db->insert('documents',array('commercial_invoice'=>$commercial_invoice
+				$this->db->insert('documents',array('commercial_invoice'=>$commercial_invoice,
+													'packing_list'=>$packing_list,
+													'lading_bill'=>$lading_bill,
+													'phytosanitary_certificate'=>$phytosanitary_certificate,
+													'origin_certificate'=>$origin_certificate,
+													'shipment_advice'=>$shipment_advice,
+													'controller_letter'=>$controller_letter,
+													'fumigation_letter'=>$fumigation_letter
 											  ));
 				$document_id=$this->db->insert_id();
 				/**********************************/

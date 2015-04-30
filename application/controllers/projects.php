@@ -15,36 +15,63 @@ class Projects extends CI_Controller {
 		
 		header('Content-Type: application/json');
 		header("Access-Control-Allow-Origin: *");
+		header("Access-Control-Request-Method: POST,GET,OPTIONS");
 		if($request_type=='POST'){
 			if($project_id==0)
 				$this->new_project();
 			else if($project_id>0){
-				$class=$this->uri->segment(3,FALSE);
-				if(!$class)die();
-				if(!in_array($class,array('customer','supplier','product','contract','import_permit','lc','shipment','document','transshipment','port','controller','payment')))die();
+				if($this->input->post('method')=='delete'){
+					$token=$this->input->post('token');
 				
-				$this->db->select('step');
-				$this->db->from('steps');
-				$this->db->where('entity',$class);
-				$target_step=$this->db->get()->row()->step;
+					$this->db->where('id',$project_id);
+					$this->db->delete('projects');
 				
-				$this->db->select('current_step');
-				$this->db->from('projects');
-				$this->db->where('id',$project_id);
-				$current_step=$this->db->get()->row()->current_step;
-				
-				if($target_step<=$current_step){
-					$id=$this->input->post('object_id');
-					if(!$id)$this->respond(400,array('error'=>'no_object_id_provided'));
-					
 					$this->db->select('id');
-					$this->db->from($class.'s');
-					$this->db->where('id',$id);
-					if($this->db->get()->num_rows()==0)$this->respond(400,array('error'=>'object_not_found'));
+					$this->db->from('tree');
+					$this->db->where('item_id',$project_id);
+					$this->db->where('item_type','project');
+				
+					$temp=$this->db->get()->row();
 					
-					$this->assign($class,$id,$project_id,$current_step);
+					$this->db->where('item_id',$project_id);
+					$this->db->where('item_type','project');
+					$this->db->delete('tree');
+					
+					if(count($temp)>0){
+						$this->db->where('parent',$temp->id);
+						$this->db->delete('tree');
+					
+						$this->respond(204,array());
+					}
 				}
-				else $this->respond(400,array('error'=>'slow_down_buddy'));
+				else{
+					$class=$this->uri->segment(3,FALSE);
+					if(!$class)die();
+					if(!in_array($class,array('customer','supplier','product','contract','import_permit','lc','shipment','document','transshipment','port','controller','payment')))die();
+				
+					$this->db->select('step');
+					$this->db->from('steps');
+					$this->db->where('entity',$class);
+					$target_step=$this->db->get()->row()->step;
+				
+					$this->db->select('current_step');
+					$this->db->from('projects');
+					$this->db->where('id',$project_id);
+					$current_step=$this->db->get()->row()->current_step;
+				
+					if($target_step<=$current_step){
+						$id=$this->input->post('object_id');
+						if(!$id)$this->respond(400,array('error'=>'no_object_id_provided'));
+					
+						$this->db->select('id');
+						$this->db->from($class.'s');
+						$this->db->where('id',$id);
+						if($this->db->get()->num_rows()==0)$this->respond(400,array('error'=>'object_not_found'));
+					
+						$this->assign($class,$id,$project_id,$current_step);
+					}
+					else $this->respond(400,array('error'=>'slow_down_buddy'));
+				}
 			}
 		}
 		else if($request_type=='GET'){
@@ -70,6 +97,10 @@ class Projects extends CI_Controller {
 				}
 				else $this->get_project($project_id);
 			}
+		}
+		else if($request_type=='DELETE'){
+		
+			
 		}
 	}
 	private function new_project(){
@@ -131,7 +162,12 @@ class Projects extends CI_Controller {
 		//$this->db->where('item_id',$id);
 		$this->db->where('parent',$parent);
 		
-		if($this->db->get()->num_rows()>0)$this->respond(400,array('relationship_already_exists'));
+		if($this->db->get()->num_rows()>0){
+			$this->db->where('item_type',$class);
+			$this->db->where('parent',$parent);
+			$this->db->update('tree',array('item_id'=>$id));
+			$this->respond(201,array('relationship_updated'));
+		}
 		
 		$this->db->insert('tree',array('item_type'=>$class,'item_id'=>$id,'parent'=>$parent));
 		

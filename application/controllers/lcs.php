@@ -35,6 +35,7 @@ class Lcs extends CI_Controller {
 		$type=$this->input->post('lc_type');
 		$opening_bank=$this->input->post('lc_opening_bank');
 		$receiving_bank=$this->input->post('lc_receiving_bank');
+		$maturity_notification=$this->input->post('maturity_notification');
 		$token=$this->input->post('token');
 		/*************************/
 		/* Section 1 - Authorize */
@@ -54,7 +55,8 @@ class Lcs extends CI_Controller {
 									  'issue_date'=>$issue_date,
 									  'type'=>$type,
 									  'opening_bank'=>$opening_bank,
-									  'receiving_bank'=>$receiving_bank
+									  'receiving_bank'=>$receiving_bank,
+									  'maturity_notification'=>$maturity_notification
 									  ));
 		$lc_id=$this->db->insert_id();
 		/**********************************/

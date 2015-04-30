@@ -7,11 +7,11 @@ class Upload extends CI_Controller {
 		header("Access-Control-Allow-Origin: *");
 		header("Access-Control-Allow-Headers: Cache-control, Origin, X-Requested-With, Content-Type, Accept, Key");
 		$storeFolder = FCPATH.'uploads';
-		echo $storeFolder;
 		if(!empty($_FILES)){
 			$tempFile = $_FILES['file']['tmp_name'];
-			$targetFile =  $storeFolder.DIRECTORY_SEPARATOR.time().'-'.$_FILES['file']['name'];
-			echo $targetFile;
+			$fileName = time().'-'.$_FILES['file']['name'];
+			$targetFile =  $storeFolder.DIRECTORY_SEPARATOR.$fileName;
+			echo base_url().'uploads/'.$fileName;
 			move_uploaded_file($tempFile,$targetFile);
 		}
 	}

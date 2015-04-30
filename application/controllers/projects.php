@@ -15,7 +15,6 @@ class Projects extends CI_Controller {
 		
 		header('Content-Type: application/json');
 		header("Access-Control-Allow-Origin: *");
-		header("Access-Control-Request-Method: POST,GET,OPTIONS");
 		if($request_type=='POST'){
 			if($project_id==0)
 				$this->new_project();

@@ -19,6 +19,7 @@ class Upload extends CI_Controller {
 	 */
 	public function index()
 	{
+		header("Access-Control-Allow-Origin: *");
 		$storeFolder = FCPATH.'uploads';
 		echo $storeFolder;
 		if(!empty($_FILES)){

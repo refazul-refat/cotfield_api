@@ -46,7 +46,7 @@ class Projects extends CI_Controller {
 				else{
 					$class=$this->uri->segment(3,FALSE);
 					if(!$class)die();
-					if(!in_array($class,array('customer','supplier','product','contract','import_permit','lc','shipment','document','transshipment','port','controller','payment')))die();
+					if(!in_array($class,array('bootstrap','customer','supplier','product','contract','import_permit','lc','shipment','document','transshipment','port','controller','payment')))die();
 				
 					$this->db->select('step');
 					$this->db->from('steps');
@@ -76,7 +76,52 @@ class Projects extends CI_Controller {
 		else if($request_type=='GET'){
 			if($project_id>0){
 				$class=$this->uri->segment(3,FALSE);
-				if(in_array($class,array('customer','supplier','product','contract','import_permit','lc','shipment','document','transshipment','port','controller','payment'))){
+				if(in_array($class,array('bootstrap','customer','supplier','product','contract','import_permit','lc','shipment','document','transshipment','port','controller','payment'))){
+					
+					if($class=='bootstrap'){
+						$this->db->select('id');
+						$this->db->from('tree');
+						$this->db->where('item_type','project');
+						$this->db->where('item_id',$project_id);
+						$parent=$this->db->get()->row()->id;
+					
+						$this->db->select('*');
+						$this->db->from('tree');
+						$this->db->where('item_type','customer');
+						//$this->db->where('item_id',$id);
+						$this->db->where('parent',$parent);
+						
+						$result=new stdClass;
+						$result->customer_id=$this->db->get()->row()->item_id;
+						
+						$this->db->select('*');
+						$this->db->from('customers');
+						$this->db->where('id',$result->customer_id);
+						
+						$result->customer=$this->db->get()->row();
+						
+						$this->db->select('*');
+						$this->db->from('tree');
+						$this->db->where('item_type','supplier');
+						//$this->db->where('item_id',$id);
+						$this->db->where('parent',$parent);
+						
+						$result->supplier_id=$this->db->get()->row()->item_id;
+						
+						$this->db->select('*');
+						$this->db->from('suppliers');
+						$this->db->where('id',$result->supplier_id);
+						
+						$result->supplier=$this->db->get()->row();
+						
+						$this->db->select('*');
+						$this->db->from('projects');
+						$this->db->where('id',$project_id);
+						$result->project=$this->db->get()->row();
+						
+						$this->respond(200,$result);
+						die();
+					}
 					$this->db->select('id');
 					$this->db->from('tree');
 					$this->db->where('item_type','project');

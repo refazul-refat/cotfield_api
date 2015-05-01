@@ -124,7 +124,15 @@ class Suppliers extends CI_Controller {
 		/* Section 4 - Prepare Response */
 		$this->db->select('id,name');
 		$this->db->from('suppliers');
-		$customer=$this->db->get()->result();
+		$suppliers=$this->db->get()->result();
+		$response=new stdClass;
+		
+		foreach($suppliers as &$supplier){
+			$value=$supplier->id;
+			$caption=new stdClass;
+			$caption->caption=$supplier->name;
+			$response->$value=$caption;
+		}
 		/********************************/
 		
 		/*****************************/
@@ -132,7 +140,7 @@ class Suppliers extends CI_Controller {
 		$this->request->dispatch('read_supplier',$token);
 		/*****************************/
 		
-		$this->respond(200,$customer);
+		$this->respond(200,$response);
 	}
 	private function skeleton(){
 		

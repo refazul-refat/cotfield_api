@@ -124,7 +124,15 @@ class Customers extends CI_Controller {
 		/* Section 4 - Prepare Response */
 		$this->db->select('id,name');
 		$this->db->from('customers');
-		$customer=$this->db->get()->result();
+		$customers=$this->db->get()->result();
+		$response=new stdClass;
+		
+		foreach($customers as &$customer){
+			$value=$customer->id;
+			$caption=new stdClass;
+			$caption->caption=$customer->name;
+			$response->$value=$caption;
+		}
 		/********************************/
 		
 		/*****************************/
@@ -132,7 +140,7 @@ class Customers extends CI_Controller {
 		$this->request->dispatch('read_customer',$token);
 		/*****************************/
 		
-		$this->respond(200,$customer);
+		$this->respond(200,$response);
 	}
 	private function skeleton(){
 		

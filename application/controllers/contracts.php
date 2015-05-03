@@ -15,75 +15,156 @@ class Contracts extends CI_Controller {
 		
 		header('Content-Type: application/json');
 		header("Access-Control-Allow-Origin: *");
+		
+		$this->load->model('contract');
 		if($request_type=='POST'){
-			if($contract_id==0)
-				$this->new_contract();
-			else{
+			if($contract_id==0){
+				$contract=new stdClass;
+				$contract->no=$this->input->post('contract_no');
+				$contract->initiate_date=$this->input->post('contract_initiate_date');
+				$contract->agreement_date=$this->input->post('contract_agreement_date');
+				$contract->commission_rate=$this->input->post('contract_commission_rate');
+				$contract->commission_rate_unit=$this->input->post('contract_commission_rate_unit');
+				$contract->copy=$this->input->post('contract_copy');
 				
+				$token=$this->input->post('token');
+				/*************************/
+				/* Section 1 - Authorize */
+				if(!$token)$this->respond('400',array('error'=>'unauthorized_access'));
+				$status=$this->authorize->client_can('create_contract',$token);
+				if($status!='authorized')$this->respond('400',array('error'=>$status));
+				/*************************/
+		
+				/******************************/
+				/* Section 2 - Validate Input */
+				if(!$contract->no)$this->respond('400',array('error'=>'empty_no'));
+				/******************************/
+		
+				/**********************************/
+				/* Section 3 - Database Operation */
+				$contract_id=$this->contract->create($contract);
+				/**********************************/
+		
+				/********************************/
+				/* Section 4 - Prepare Response */
+				$contract=$this->contract->read($contract_id);
+				/********************************/
+		
+				/*****************************/
+				/* Section 5 - Consume Token */
+				$this->request->dispatch('create_contract',$token);
+				/*****************************/
+		
+				$this->respond(201,$contract);
+			}
+			else{
+				if($this->input->post('method')=='update'){
+					$contract=new stdClass;
+					if($this->input->post('contract_no'))$contract->no=$this->input->post('contract_no');
+					if($this->input->post('contract_initiate_date'))$contract->initiate_date=$this->input->post('contract_initiate_date');
+					if($this->input->post('contract_agreement_date'))$contract->agreement_date=$this->input->post('contract_agreement_date');
+					if($this->input->post('contract_commission_rate'))$contract->commission_rate=$this->input->post('contract_commission_rate');
+					if($this->input->post('contract_commission_rate_unit'))$contract->commission_rate_unit=$this->input->post('contract_commission_rate_unit');
+					if($this->input->post('contract_copy'))$contract->copy=$this->input->post('contract_copy');
+				
+					$token=$this->input->post('token');
+					/*************************/
+					/* Section 1 - Authorize */
+					if(!$token)$this->respond('400',array('error'=>'unauthorized_access'));
+					$status=$this->authorize->client_can('update_contract',$token);
+					if($status!='authorized')$this->respond('400',array('error'=>$status));
+					/*************************/
+		
+					/******************************/
+					/* Section 2 - Validate Input */
+					/******************************/
+		
+					/**********************************/
+					/* Section 3 - Database Operation */
+					$array=(array)$contract;
+					if(!empty($array))$this->contract->update($contract_id,$contract);
+					/**********************************/
+		
+					/********************************/
+					/* Section 4 - Prepare Response */
+					unset($contract);
+					$contract=$this->contract->read($contract_id);
+					/********************************/
+		
+					/*****************************/
+					/* Section 5 - Consume Token */
+					$this->request->dispatch('update_contract',$token);
+					/*****************************/
+		
+					$this->respond(200,$contract);
+				}
+				else if($this->input->post('method')=='delete'){
+					$token=$this->input->post('token');
+					/*************************/
+					/* Section 1 - Authorize */
+					if(!$token)$this->respond('400',array('error'=>'unauthorized_access'));
+					$status=$this->authorize->client_can('delete_contract',$token);
+					if($status!='authorized')$this->respond('400',array('error'=>$status));
+					/*************************/
+		
+					/******************************/
+					/* Section 2 - Validate Input */
+					/******************************/
+		
+					/**********************************/
+					/* Section 3 - Database Operation */
+					$this->contract->delete($contract_id);
+					/**********************************/
+		
+					/********************************/
+					/* Section 4 - Prepare Response */
+					/********************************/
+		
+					/*****************************/
+					/* Section 5 - Consume Token */
+					$this->request->dispatch('delete_contract',$token);
+					/*****************************/
+		
+					$this->respond(204,array());
+				}
 			}
 		}
 		else if($request_type=='GET'){
 			if($contract_id>0){
-				$this->get_contract($contract_id);
+				$token=$this->input->get_post('token');
+				/*************************/
+				/* Section 1 - Authorize */
+				if(!$token)$this->respond('400',array('error'=>'unauthorized_access'));
+				$status=$this->authorize->client_can('read_contract',$token);
+				if($status!='authorized')$this->respond('400',array('error'=>$status));
+				/*************************/
+		
+				/******************************/
+				/* Section 2 - Validate Input */
+				/******************************/
+		
+				/**********************************/
+				/* Section 3 - Database Operation */
+				/**********************************/
+		
+				/********************************/
+				/* Section 4 - Prepare Response */
+				$contract=$this->contract->read($contract_id);
+				/********************************/
+		
+				/*****************************/
+				/* Section 5 - Consume Token */
+				$this->request->dispatch('read_contract',$token);
+				/*****************************/
+		
+				$this->respond(200,$contract);
+			}
+			else{
+				$this->list_contracts();
 			}
 		}
 	}
-	private function new_contract(){
-		
-		/*
-		Fields: no,initiate_date,agreement_date,commission_rate,commission_rate_unit,copy
-		*/
-		
-		$contract_no=$this->input->post('contract_no');
-		$contract_initiate_date=$this->input->post('contract_initiate_date');
-		$contract_agreement_date=$this->input->post('contract_agreement_date');
-		$contract_commission_rate=$this->input->post('contract_commission_rate');
-		$contract_commission_rate_unit=$this->input->post('contract_commission_rate_unit');
-		$contract_copy=$this->input->post('contract_copy');
-		$token=$this->input->post('token');
-		/*************************/
-		/* Section 1 - Authorize */
-		if(!$token)$this->respond('400',array('error'=>'unauthorized_access'));
-		$status=$this->authorize->client_can('create_contract',$token);
-		if($status!='authorized')$this->respond('400',array('error'=>$status));
-		/*************************/
-		
-		/******************************/
-		/* Section 2 - Validate Input */
-		if(!$contract_no)$this->respond('400',array('error'=>'empty_contract_no'));
-		if(!is_numeric($contract_commission_rate))$this->respond(400,array('error'=>'invalid_commission_rate'));
-		if(!in_array($contract_commission_rate_unit,array('lbs','kg','kgs')))$this->respond(400,array('error'=>'invalid_commission_rate_unit'));
-		/******************************/
-		
-		/**********************************/
-		/* Section 3 - Database Operation */
-		$this->db->insert('contracts',array('no'=>$contract_no,
-											'initiate_date'=>$contract_initiate_date,
-											'agreement_date'=>$contract_agreement_date,
-											'commission_rate'=>$contract_commission_rate,
-											'commission_rate_unit'=>$contract_commission_rate_unit,
-											'copy'=>$contract_copy
-											));
-		$contract_id=$this->db->insert_id();
-		/**********************************/
-		
-		/********************************/
-		/* Section 4 - Prepare Response */
-		$this->db->select('*');
-		$this->db->from('contracts');
-		$this->db->where('id',$contract_id);
-		$contract=$this->db->get()->row();
-		/********************************/
-		
-		/*****************************/
-		/* Section 5 - Consume Token */
-		$this->request->dispatch('create_contract',$token);
-		/*****************************/
-		
-		$this->respond(201,$contract);
-	}
-	private function get_contract($contract_id){
-		
+	private function list_contracts(){
 		$token=$this->input->get_post('token');
 		/*************************/
 		/* Section 1 - Authorize */
@@ -102,10 +183,17 @@ class Contracts extends CI_Controller {
 		
 		/********************************/
 		/* Section 4 - Prepare Response */
-		$this->db->select('*');
+		$this->db->select('id,name');
 		$this->db->from('contracts');
-		$this->db->where('id',$contract_id);
-		$contract=$this->db->get()->row();
+		$contracts=$this->db->get()->result();
+		$response=new stdClass;
+		
+		foreach($contracts as &$contract){
+			$value=$contract->id;
+			$caption=new stdClass;
+			$caption->caption=$contract->name;
+			$response->$value=$caption;
+		}
 		/********************************/
 		
 		/*****************************/
@@ -113,7 +201,7 @@ class Contracts extends CI_Controller {
 		$this->request->dispatch('read_contract',$token);
 		/*****************************/
 		
-		$this->respond(200,$contract);
+		$this->respond(200,$response);
 	}
 	private function skeleton(){
 		

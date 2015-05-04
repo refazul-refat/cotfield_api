@@ -5,7 +5,7 @@ class Shipments extends CI_Controller {
 	public function respond($http_response_code,$message){
 		http_response_code($http_response_code);
 		echo json_encode($message);
-		die();die();
+		die();
 	}
 	
 	public function index(){
@@ -15,14 +15,18 @@ class Shipments extends CI_Controller {
 		
 		header('Content-Type: application/json');
 		header("Access-Control-Allow-Origin: *");
+		
+		$this->load->model('shipment');
 		if($request_type=='POST'){
 			if($shipment_id==0){
-				$date=$this->input->post('shipment_date');
-				$type=$this->input->post('shipment_type');
-				$partial_shipment=$this->input->post('partial_shipment');
-				$transshipment=$this->input->post('transshipment');
-				$loading_port=$this->input->post('loading_port');
-				$discharge_port=$this->input->post('discharge_port');
+				$shipment=new stdClass;
+				$shipment->date=$this->input->post('shipment_date');
+				$shipment->type=$this->input->post('shipment_type');
+				$shipment->partial=$this->input->post('shipment_partial');
+				$shipment->transshipment=$this->input->post('shipment_transshipment');
+				$shipment->loading_port=$this->input->post('shipment_loading_port');
+				$shipment->discharge_port=$this->input->post('shipment_discharge_port');
+				
 				$token=$this->input->post('token');
 				/*************************/
 				/* Section 1 - Authorize */
@@ -33,29 +37,17 @@ class Shipments extends CI_Controller {
 		
 				/******************************/
 				/* Section 2 - Validate Input */
-				if(!in_array(strtolower($type),array('road','air')))$this->respond('400',array('error'=>'invalid_shipment_type'));
-				if(!in_array(strtolower($partial_shipment),array('yes','no')))$this->respond('400',array('error'=>'invalid_partial_shipment'));
-				if(!in_array(strtolower($transshipment),array('yes','no')))$this->respond('400',array('error'=>'invalid_transshipment'));
+				//if(!$shipment->no)$this->respond('400',array('error'=>'empty_no'));
 				/******************************/
 		
 				/**********************************/
 				/* Section 3 - Database Operation */
-				$this->db->insert('shipments',array('date'=>$date,
-											  'type'=>$type,
-											  'partial_shipment'=>$partial_shipment,
-											  'transshipment'=>$transshipment,
-											  'loading_port'=>$loading_port,
-											  'discharge_port'=>$discharge_port
-											  ));
-				$shipment_id=$this->db->insert_id();
+				$shipment_id=$this->shipment->create($shipment);
 				/**********************************/
 		
 				/********************************/
 				/* Section 4 - Prepare Response */
-				$this->db->select('*');
-				$this->db->from('shipments');
-				$this->db->where('id',$shipment_id);
-				$shipment=$this->db->get()->row();
+				$shipment=$this->shipment->read($shipment_id);
 				/********************************/
 		
 				/*****************************/
@@ -66,21 +58,113 @@ class Shipments extends CI_Controller {
 				$this->respond(201,$shipment);
 			}
 			else{
+				if($this->input->post('method')=='update'){
+					$shipment=new stdClass;
+					if($this->input->post('shipment_date'))$shipment->date=$this->input->post('shipment_date');
+					if($this->input->post('shipment_type'))$shipment->type=$this->input->post('shipment_type');
+					if($this->input->post('shipment_partial'))$shipment->partial=$this->input->post('shipment_partial');
+					if($this->input->post('shipment_transshipment'))$shipment->transshipment=$this->input->post('shipment_transshipment');
+					if($this->input->post('shipment_loading_port'))$shipment->loading_port=$this->input->post('shipment_loading_port');
+					if($this->input->post('shipment_discharge_port'))$shipment->discharge_port=$this->input->post('shipment_discharge_port');
 				
+					$token=$this->input->post('token');
+					/*************************/
+					/* Section 1 - Authorize */
+					if(!$token)$this->respond('400',array('error'=>'unauthorized_access'));
+					$status=$this->authorize->client_can('update_shipment',$token);
+					if($status!='authorized')$this->respond('400',array('error'=>$status));
+					/*************************/
+		
+					/******************************/
+					/* Section 2 - Validate Input */
+					/******************************/
+		
+					/**********************************/
+					/* Section 3 - Database Operation */
+					$array=(array)$shipment;
+					if(!empty($array))$this->shipment->update($shipment_id,$shipment);
+					/**********************************/
+		
+					/********************************/
+					/* Section 4 - Prepare Response */
+					unset($shipment);
+					$shipment=$this->shipment->read($shipment_id);
+					/********************************/
+		
+					/*****************************/
+					/* Section 5 - Consume Token */
+					$this->request->dispatch('update_shipment',$token);
+					/*****************************/
+		
+					$this->respond(200,$shipment);
+				}
+				else if($this->input->post('method')=='delete'){
+					$token=$this->input->post('token');
+					/*************************/
+					/* Section 1 - Authorize */
+					if(!$token)$this->respond('400',array('error'=>'unauthorized_access'));
+					$status=$this->authorize->client_can('delete_shipment',$token);
+					if($status!='authorized')$this->respond('400',array('error'=>$status));
+					/*************************/
+		
+					/******************************/
+					/* Section 2 - Validate Input */
+					/******************************/
+		
+					/**********************************/
+					/* Section 3 - Database Operation */
+					$this->shipment->delete($shipment_id);
+					/**********************************/
+		
+					/********************************/
+					/* Section 4 - Prepare Response */
+					/********************************/
+		
+					/*****************************/
+					/* Section 5 - Consume Token */
+					$this->request->dispatch('delete_shipment',$token);
+					/*****************************/
+		
+					$this->respond(204,array());
+				}
 			}
 		}
 		else if($request_type=='GET'){
 			if($shipment_id>0){
-				$this->get_shipment($shipment_id);
+				$token=$this->input->get_post('token');
+				/*************************/
+				/* Section 1 - Authorize */
+				if(!$token)$this->respond('400',array('error'=>'unauthorized_access'));
+				$status=$this->authorize->client_can('read_shipment',$token);
+				if($status!='authorized')$this->respond('400',array('error'=>$status));
+				/*************************/
+		
+				/******************************/
+				/* Section 2 - Validate Input */
+				/******************************/
+		
+				/**********************************/
+				/* Section 3 - Database Operation */
+				/**********************************/
+		
+				/********************************/
+				/* Section 4 - Prepare Response */
+				$shipment=$this->shipment->read($shipment_id);
+				/********************************/
+		
+				/*****************************/
+				/* Section 5 - Consume Token */
+				$this->request->dispatch('read_shipment',$token);
+				/*****************************/
+		
+				$this->respond(200,$shipment);
+			}
+			else{
+				$this->list_shipments();
 			}
 		}
 	}
-	private function new_shipment(){
-		
-		
-	}
-	private function get_shipment($shipment_id){
-		
+	private function list_shipments(){
 		$token=$this->input->get_post('token');
 		/*************************/
 		/* Section 1 - Authorize */
@@ -99,10 +183,17 @@ class Shipments extends CI_Controller {
 		
 		/********************************/
 		/* Section 4 - Prepare Response */
-		$this->db->select('*');
+		$this->db->select('id,name');
 		$this->db->from('shipments');
-		$this->db->where('id',$shipment_id);
-		$shipment=$this->db->get()->row();
+		$shipments=$this->db->get()->result();
+		$response=new stdClass;
+		
+		foreach($shipments as &$shipment){
+			$value=$shipment->id;
+			$caption=new stdClass;
+			$caption->caption=$shipment->name;
+			$response->$value=$caption;
+		}
 		/********************************/
 		
 		/*****************************/
@@ -110,7 +201,7 @@ class Shipments extends CI_Controller {
 		$this->request->dispatch('read_shipment',$token);
 		/*****************************/
 		
-		$this->respond(200,$shipment);
+		$this->respond(200,$response);
 	}
 	private function skeleton(){
 		

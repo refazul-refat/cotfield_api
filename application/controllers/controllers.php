@@ -5,7 +5,7 @@ class Controllers extends CI_Controller {
 	public function respond($http_response_code,$message){
 		http_response_code($http_response_code);
 		echo json_encode($message);
-		die();die();
+		die();
 	}
 	
 	public function index(){
@@ -15,19 +15,17 @@ class Controllers extends CI_Controller {
 		
 		header('Content-Type: application/json');
 		header("Access-Control-Allow-Origin: *");
+		
+		$this->load->model('controller');
 		if($request_type=='POST'){
 			if($controller_id==0){
-				$company=$this->input->post('controller_company');
-				$weight_finalization_area=$this->input->post('weight_finalization_area');
-				$final_weight=$this->input->post('final_weight');
-				$final_weight_unit=$this->input->post('final_weight_unit');
-				$weight_claim=$this->input->post('weight_claim');
-				$weight_claim_unit=$this->input->post('weight_claim_unit');
-				$unit_price=$this->input->post('unit_price');
-				$unit_price_currency=$this->input->post('unit_price_currency');
-				$claim_amount=$this->input->post('claim_amount');
-				$claim_amount_unit=$this->input->post('claim_amount_unit');
-				$landing_report=$this->input->post('landing_report');
+				$controller=new stdClass;
+				$controller->company=$this->input->post('controller_company');
+				$controller->weight_finalization_area=$this->input->post('controller_weight_finalization_area');
+				$controller->final_weight=$this->input->post('controller_final_weight');
+				$controller->final_weight_unit=$this->input->post('controller_final_weight_unit');
+				$controller->landing_report=$this->input->post('controller_landing_report');
+				
 				$token=$this->input->post('token');
 				/*************************/
 				/* Section 1 - Authorize */
@@ -38,31 +36,17 @@ class Controllers extends CI_Controller {
 		
 				/******************************/
 				/* Section 2 - Validate Input */
+				//if(!$controller->name)$this->respond('400',array('error'=>'empty_name'));
 				/******************************/
 		
 				/**********************************/
 				/* Section 3 - Database Operation */
-				$this->db->insert('controllers',array('company'=>$company,
-												'weight_finalization_area'=>$weight_finalization_area,
-												'final_weight'=>$final_weight,
-												'final_weight_unit'=>$final_weight_unit,
-												'weight_claim'=>$weight_claim,
-												'weight_claim_unit'=>$weight_claim_unit,
-												'unit_price'=>$unit_price,
-												'unit_price_currency'=>$unit_price_currency,
-												'claim_amount'=>$claim_amount,
-												'claim_amount_unit'=>$claim_amount_unit,
-												'landing_report'=>$landing_report
-											  ));
-				$controller_id=$this->db->insert_id();
+				$controller_id=$this->controller->create($controller);
 				/**********************************/
 		
 				/********************************/
 				/* Section 4 - Prepare Response */
-				$this->db->select('*');
-				$this->db->from('controllers');
-				$this->db->where('id',$controller_id);
-				$controller=$this->db->get()->row();
+				$controller=$this->controller->read($controller_id);
 				/********************************/
 		
 				/*****************************/
@@ -73,21 +57,112 @@ class Controllers extends CI_Controller {
 				$this->respond(201,$controller);
 			}
 			else{
+				if($this->input->post('method')=='update'){
+					$controller=new stdClass;
+					if($this->input->post('controller_company'))$controller->company=$this->input->post('controller_company');
+					if($this->input->post('controller_weight_finalization_area'))$controller->weight_finalization_area=$this->input->post('controller_weight_finalization_area');
+					if($this->input->post('controller_final_weight'))$controller->final_weight=$this->input->post('controller_final_weight');
+					if($this->input->post('controller_final_weight_unit'))$controller->final_weight_unit=$this->input->post('controller_final_weight_unit');
+					if($this->input->post('controller_landing_report'))$controller->landing_report=$this->input->post('controller_landing_report');
 				
+					$token=$this->input->post('token');
+					/*************************/
+					/* Section 1 - Authorize */
+					if(!$token)$this->respond('400',array('error'=>'unauthorized_access'));
+					$status=$this->authorize->client_can('update_controller',$token);
+					if($status!='authorized')$this->respond('400',array('error'=>$status));
+					/*************************/
+		
+					/******************************/
+					/* Section 2 - Validate Input */
+					/******************************/
+		
+					/**********************************/
+					/* Section 3 - Database Operation */
+					$array=(array)$controller;
+					if(!empty($array))$this->controller->update($controller_id,$controller);
+					/**********************************/
+		
+					/********************************/
+					/* Section 4 - Prepare Response */
+					unset($controller);
+					$controller=$this->controller->read($controller_id);
+					/********************************/
+		
+					/*****************************/
+					/* Section 5 - Consume Token */
+					$this->request->dispatch('update_controller',$token);
+					/*****************************/
+		
+					$this->respond(200,$controller);
+				}
+				else if($this->input->post('method')=='delete'){
+					$token=$this->input->post('token');
+					/*************************/
+					/* Section 1 - Authorize */
+					if(!$token)$this->respond('400',array('error'=>'unauthorized_access'));
+					$status=$this->authorize->client_can('delete_controller',$token);
+					if($status!='authorized')$this->respond('400',array('error'=>$status));
+					/*************************/
+		
+					/******************************/
+					/* Section 2 - Validate Input */
+					/******************************/
+		
+					/**********************************/
+					/* Section 3 - Database Operation */
+					$this->controller->delete($controller_id);
+					/**********************************/
+		
+					/********************************/
+					/* Section 4 - Prepare Response */
+					/********************************/
+		
+					/*****************************/
+					/* Section 5 - Consume Token */
+					$this->request->dispatch('delete_controller',$token);
+					/*****************************/
+		
+					$this->respond(204,array());
+				}
 			}
 		}
 		else if($request_type=='GET'){
 			if($controller_id>0){
-				$this->get_controller($controller_id);
+				$token=$this->input->get_post('token');
+				/*************************/
+				/* Section 1 - Authorize */
+				if(!$token)$this->respond('400',array('error'=>'unauthorized_access'));
+				$status=$this->authorize->client_can('read_controller',$token);
+				if($status!='authorized')$this->respond('400',array('error'=>$status));
+				/*************************/
+		
+				/******************************/
+				/* Section 2 - Validate Input */
+				/******************************/
+		
+				/**********************************/
+				/* Section 3 - Database Operation */
+				/**********************************/
+		
+				/********************************/
+				/* Section 4 - Prepare Response */
+				$controller=$this->controller->read($controller_id);
+				/********************************/
+		
+				/*****************************/
+				/* Section 5 - Consume Token */
+				$this->request->dispatch('read_controller',$token);
+				/*****************************/
+		
+				$this->respond(200,$controller);
+			}
+			else{
+				$this->list_controllers();
 			}
 		}
 	}
-	private function new_controller(){
-		
-		
-	}
-	private function get_controller($controller_id){
-		
+	private function list_controllers(){
 		$token=$this->input->get_post('token');
 		/*************************/
 		/* Section 1 - Authorize */
@@ -106,10 +181,17 @@ class Controllers extends CI_Controller {
 		
 		/********************************/
 		/* Section 4 - Prepare Response */
-		$this->db->select('*');
+		$this->db->select('id,name');
 		$this->db->from('controllers');
-		$this->db->where('id',$controller_id);
-		$controller=$this->db->get()->row();
+		$controllers=$this->db->get()->result();
+		$response=new stdClass;
+		
+		foreach($controllers as &$controller){
+			$value=$controller->id;
+			$caption=new stdClass;
+			$caption->caption=$controller->name;
+			$response->$value=$caption;
+		}
 		/********************************/
 		
 		/*****************************/
@@ -117,7 +199,7 @@ class Controllers extends CI_Controller {
 		$this->request->dispatch('read_controller',$token);
 		/*****************************/
 		
-		$this->respond(200,$controller);
+		$this->respond(200,$response);
 	}
 	private function skeleton(){
 		

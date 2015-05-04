@@ -15,61 +15,150 @@ class Import_permits extends CI_Controller {
 		
 		header('Content-Type: application/json');
 		header("Access-Control-Allow-Origin: *");
+		
+		$this->load->model('import_permit');
 		if($request_type=='POST'){
-			if($import_permit_id==0)
-				$this->new_import_permit();
-			else{
+			if($import_permit_id==0){
+				$import_permit=new stdClass;
+				$import_permit->no=$this->input->post('import_permit_no');
+				$import_permit->date=$this->input->post('import_permit_date');
+				$import_permit->copy=$this->input->post('import_permit_copy');
 				
+				$token=$this->input->post('token');
+				/*************************/
+				/* Section 1 - Authorize */
+				if(!$token)$this->respond('400',array('error'=>'unauthorized_access'));
+				$status=$this->authorize->client_can('create_import_permit',$token);
+				if($status!='authorized')$this->respond('400',array('error'=>$status));
+				/*************************/
+		
+				/******************************/
+				/* Section 2 - Validate Input */
+				if(!$import_permit->no)$this->respond('400',array('error'=>'empty_no'));
+				/******************************/
+		
+				/**********************************/
+				/* Section 3 - Database Operation */
+				$import_permit_id=$this->import_permit->create($import_permit);
+				/**********************************/
+		
+				/********************************/
+				/* Section 4 - Prepare Response */
+				$import_permit=$this->import_permit->read($import_permit_id);
+				/********************************/
+		
+				/*****************************/
+				/* Section 5 - Consume Token */
+				$this->request->dispatch('create_import_permit',$token);
+				/*****************************/
+		
+				$this->respond(201,$import_permit);
+			}
+			else{
+				if($this->input->post('method')=='update'){
+					$import_permit=new stdClass;
+					if($this->input->post('import_permit_no'))$import_permit->no=$this->input->post('import_permit_no');
+					if($this->input->post('import_permit_date'))$import_permit->date=$this->input->post('import_permit_date');
+					if($this->input->post('import_permit_copy'))$import_permit->copy=$this->input->post('import_permit_copy');
+				
+					$token=$this->input->post('token');
+					/*************************/
+					/* Section 1 - Authorize */
+					if(!$token)$this->respond('400',array('error'=>'unauthorized_access'));
+					$status=$this->authorize->client_can('update_import_permit',$token);
+					if($status!='authorized')$this->respond('400',array('error'=>$status));
+					/*************************/
+		
+					/******************************/
+					/* Section 2 - Validate Input */
+					/******************************/
+		
+					/**********************************/
+					/* Section 3 - Database Operation */
+					$array=(array)$import_permit;
+					if(!empty($array))$this->import_permit->update($import_permit_id,$import_permit);
+					/**********************************/
+		
+					/********************************/
+					/* Section 4 - Prepare Response */
+					unset($import_permit);
+					$import_permit=$this->import_permit->read($import_permit_id);
+					/********************************/
+		
+					/*****************************/
+					/* Section 5 - Consume Token */
+					$this->request->dispatch('update_import_permit',$token);
+					/*****************************/
+		
+					$this->respond(200,$import_permit);
+				}
+				else if($this->input->post('method')=='delete'){
+					$token=$this->input->post('token');
+					/*************************/
+					/* Section 1 - Authorize */
+					if(!$token)$this->respond('400',array('error'=>'unauthorized_access'));
+					$status=$this->authorize->client_can('delete_import_permit',$token);
+					if($status!='authorized')$this->respond('400',array('error'=>$status));
+					/*************************/
+		
+					/******************************/
+					/* Section 2 - Validate Input */
+					/******************************/
+		
+					/**********************************/
+					/* Section 3 - Database Operation */
+					$this->import_permit->delete($import_permit_id);
+					/**********************************/
+		
+					/********************************/
+					/* Section 4 - Prepare Response */
+					/********************************/
+		
+					/*****************************/
+					/* Section 5 - Consume Token */
+					$this->request->dispatch('delete_import_permit',$token);
+					/*****************************/
+		
+					$this->respond(204,array());
+				}
 			}
 		}
 		else if($request_type=='GET'){
 			if($import_permit_id>0){
-				$this->get_import_permit($import_permit_id);
+				$token=$this->input->get_post('token');
+				/*************************/
+				/* Section 1 - Authorize */
+				if(!$token)$this->respond('400',array('error'=>'unauthorized_access'));
+				$status=$this->authorize->client_can('read_import_permit',$token);
+				if($status!='authorized')$this->respond('400',array('error'=>$status));
+				/*************************/
+		
+				/******************************/
+				/* Section 2 - Validate Input */
+				/******************************/
+		
+				/**********************************/
+				/* Section 3 - Database Operation */
+				/**********************************/
+		
+				/********************************/
+				/* Section 4 - Prepare Response */
+				$import_permit=$this->import_permit->read($import_permit_id);
+				/********************************/
+		
+				/*****************************/
+				/* Section 5 - Consume Token */
+				$this->request->dispatch('read_import_permit',$token);
+				/*****************************/
+		
+				$this->respond(200,$import_permit);
+			}
+			else{
+				$this->list_import_permits();
 			}
 		}
 	}
-	private function new_import_permit(){
-		
-		$no=$this->input->post('import_permit_no');
-		$date=$this->input->post('import_permit_date');
-		$token=$this->input->post('token');
-		/*************************/
-		/* Section 1 - Authorize */
-		if(!$token)$this->respond('400',array('error'=>'unauthorized_access'));
-		$status=$this->authorize->client_can('create_import_permit',$token);
-		if($status!='authorized')$this->respond('400',array('error'=>$status));
-		/*************************/
-		
-		/******************************/
-		/* Section 2 - Validate Input */
-		if(!$no)$this->respond('400',array('error'=>'empty_import_permit_no'));
-		/******************************/
-		
-		/**********************************/
-		/* Section 3 - Database Operation */
-		$this->db->insert('import_permits',array('no'=>$no,
-												'date'=>$date
-											));
-		$import_permit_id=$this->db->insert_id();
-		/**********************************/
-		
-		/********************************/
-		/* Section 4 - Prepare Response */
-		$this->db->select('*');
-		$this->db->from('import_permits');
-		$this->db->where('id',$import_permit_id);
-		$import_permit=$this->db->get()->row();
-		/********************************/
-		
-		/*****************************/
-		/* Section 5 - Consume Token */
-		$this->request->dispatch('create_import_permit',$token);
-		/*****************************/
-		
-		$this->respond(201,$import_permit);
-	}
-	private function get_import_permit($import_permit_id){
-		
+	private function list_import_permits(){
 		$token=$this->input->get_post('token');
 		/*************************/
 		/* Section 1 - Authorize */
@@ -88,10 +177,17 @@ class Import_permits extends CI_Controller {
 		
 		/********************************/
 		/* Section 4 - Prepare Response */
-		$this->db->select('*');
+		$this->db->select('id,name');
 		$this->db->from('import_permits');
-		$this->db->where('id',$import_permit_id);
-		$import_permit=$this->db->get()->row();
+		$import_permits=$this->db->get()->result();
+		$response=new stdClass;
+		
+		foreach($import_permits as &$import_permit){
+			$value=$import_permit->id;
+			$caption=new stdClass;
+			$caption->caption=$import_permit->name;
+			$response->$value=$caption;
+		}
 		/********************************/
 		
 		/*****************************/
@@ -99,7 +195,7 @@ class Import_permits extends CI_Controller {
 		$this->request->dispatch('read_import_permit',$token);
 		/*****************************/
 		
-		$this->respond(200,$import_permit);
+		$this->respond(200,$response);
 	}
 	private function skeleton(){
 		

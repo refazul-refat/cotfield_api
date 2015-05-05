@@ -61,7 +61,7 @@ class Payments extends CI_Controller {
 					if($this->input->post('payment_supplier_clearance'))$payment->supplier_clearance=$this->input->post('payment_supplier_clearance');
 					if($this->input->post('payment_receiving_date'))$payment->receiving_date=$this->input->post('payment_receiving_date');
 					if($this->input->post('payment_late_payment'))$payment->late_payment=$this->input->post('payment_late_payment');
-					if($this->input->post('payment_payment_document'))$payment->payment_document=$this->input->post('payment_payment_document');
+					$payment->payment_document=$this->input->post('payment_payment_document');
 				
 					$token=$this->input->post('token');
 					/*************************/

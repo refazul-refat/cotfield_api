@@ -65,7 +65,7 @@ class Contracts extends CI_Controller {
 					if($this->input->post('contract_agreement_date'))$contract->agreement_date=$this->input->post('contract_agreement_date');
 					if($this->input->post('contract_commission_rate'))$contract->commission_rate=$this->input->post('contract_commission_rate');
 					if($this->input->post('contract_commission_rate_unit'))$contract->commission_rate_unit=$this->input->post('contract_commission_rate_unit');
-					if($this->input->post('contract_copy'))$contract->copy=$this->input->post('contract_copy');
+					$contract->copy=$this->input->post('contract_copy');
 				
 					$token=$this->input->post('token');
 					/*************************/

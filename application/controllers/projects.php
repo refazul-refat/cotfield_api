@@ -47,7 +47,42 @@ class Projects extends CI_Controller {
 					$class=$this->uri->segment(3,FALSE);
 					if(!$class)die();
 					if(!in_array($class,array('bootstrap','customer','supplier','product','contract','import_permit','lc','shipment','document','transshipment','port','controller','payment')))die();
-				
+					if(in_array($class,array('customer','supplier'))){
+						$id=$this->input->post('object_id');
+						if(!$id)$this->respond(400,array('error'=>'no_object_id_provided'));
+					
+						$this->db->select('id');
+						$this->db->from($class.'s');
+						$this->db->where('id',$id);
+						if($this->db->get()->num_rows()==0)$this->respond(400,array('error'=>'object_not_found'));
+						
+						$this->db->select('id');
+						$this->db->from('tree');
+						$this->db->where('item_type','project');
+						$this->db->where('item_id',$project_id);
+						$parent=$this->db->get()->row()->id;
+						
+						$this->db->select('id');
+						$this->db->from('tree');
+						$this->db->where('item_type',$class);
+						//$this->db->where('item_id',$id);
+						$this->db->where('parent',$parent);
+						
+						if($this->db->get()->num_rows()>0){
+							$this->db->where('item_type',$class);
+							$this->db->where('parent',$parent);
+							$this->db->update('tree',array('item_id'=>$id));
+							$this->respond(201,array('relationship_updated'));
+						}
+						
+						$this->db->insert('tree',array('item_type'=>$class,'item_id'=>$id,'parent'=>$parent));
+						/*
+						$current_step+=1;
+						$this->db->where('id',$project_id);
+						$this->db->update('projects',array('current_step'=>$current_step));
+						*/
+						$this->respond(201,array('status'=>'relationship_created'));
+					}
 					$this->db->select('step');
 					$this->db->from('steps');
 					$this->db->where('entity',$class);
@@ -58,7 +93,7 @@ class Projects extends CI_Controller {
 					$this->db->where('id',$project_id);
 					$current_step=$this->db->get()->row()->current_step;
 				
-					if($target_step<=$current_step){
+					if(($target_step-1)<=$current_step){
 						$id=$this->input->post('object_id');
 						if(!$id)$this->respond(400,array('error'=>'no_object_id_provided'));
 					
@@ -169,7 +204,7 @@ class Projects extends CI_Controller {
 											'description'=>$this->input->post('project_description')?$this->input->post('project_description'):'',
 											'created_on'=>date('Y-m-d H:i:s'),
 											'last_modified'=>date('Y-m-d H:i:s'),
-											'current_step'=>0));
+											'current_step'=>1));
 		$project_id=$this->db->insert_id();
 		$this->db->insert('tree',array('item_id'=>$project_id,
 										'item_type'=>'project',

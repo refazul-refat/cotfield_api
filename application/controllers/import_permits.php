@@ -59,7 +59,7 @@ class Import_permits extends CI_Controller {
 					$import_permit=new stdClass;
 					if($this->input->post('import_permit_no'))$import_permit->no=$this->input->post('import_permit_no');
 					if($this->input->post('import_permit_date'))$import_permit->date=$this->input->post('import_permit_date');
-					if($this->input->post('import_permit_copy'))$import_permit->copy=$this->input->post('import_permit_copy');
+					$import_permit->copy=$this->input->post('import_permit_copy');
 				
 					$token=$this->input->post('token');
 					/*************************/

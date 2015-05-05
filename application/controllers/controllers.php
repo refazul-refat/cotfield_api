@@ -63,7 +63,7 @@ class Controllers extends CI_Controller {
 					if($this->input->post('controller_weight_finalization_area'))$controller->weight_finalization_area=$this->input->post('controller_weight_finalization_area');
 					if($this->input->post('controller_final_weight'))$controller->final_weight=$this->input->post('controller_final_weight');
 					if($this->input->post('controller_final_weight_unit'))$controller->final_weight_unit=$this->input->post('controller_final_weight_unit');
-					if($this->input->post('controller_landing_report'))$controller->landing_report=$this->input->post('controller_landing_report');
+					$controller->landing_report=$this->input->post('controller_landing_report');
 				
 					$token=$this->input->post('token');
 					/*************************/

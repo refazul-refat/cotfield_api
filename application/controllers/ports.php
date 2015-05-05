@@ -59,7 +59,7 @@ class Ports extends CI_Controller {
 				if($this->input->post('method')=='update'){
 					$port=new stdClass;
 					if($this->input->post('port_buyer_cnf'))$port->buyer_cnf=$this->input->post('port_buyer_cnf');
-					if($this->input->post('port_clearance_document'))$port->clearance_document=$this->input->post('port_clearance_document');
+					$port->clearance_document=$this->input->post('port_clearance_document');
 					if($this->input->post('port_invoice_weight'))$port->invoice_weight=$this->input->post('port_invoice_weight');
 					if($this->input->post('port_invoice_weight_unit'))$port->invoice_weight_unit=$this->input->post('port_invoice_weight_unit');
 				

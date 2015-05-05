@@ -62,14 +62,14 @@ class Documents extends CI_Controller {
 			else{
 				if($this->input->post('method')=='update'){
 					$document=new stdClass;
-					if($this->input->post('document_commercial_invoice'))$document->commercial_invoice=$this->input->post('document_commercial_invoice');
-					if($this->input->post('document_packing_list'))$document->packing_list=$this->input->post('document_packing_list');
-					if($this->input->post('document_lading_bill'))$document->lading_bill=$this->input->post('document_lading_bill');
-					if($this->input->post('document_phytosanitary_certificate'))$document->phytosanitary_certificate=$this->input->post('document_phytosanitary_certificate');
-					if($this->input->post('document_origin_certificate'))$document->origin_certificate=$this->input->post('document_origin_certificate');
-					if($this->input->post('document_shipment_advice'))$document->shipment_advice=$this->input->post('document_shipment_advice');
-					if($this->input->post('document_controller_letter'))$document->controller_letter=$this->input->post('document_controller_letter');
-					if($this->input->post('document_fumigation_letter'))$document->fumigation_letter=$this->input->post('document_fumigation_letter');
+					$document->commercial_invoice=$this->input->post('document_commercial_invoice');
+					$document->packing_list=$this->input->post('document_packing_list');
+					$document->lading_bill=$this->input->post('document_lading_bill');
+					$document->phytosanitary_certificate=$this->input->post('document_phytosanitary_certificate');
+					$document->origin_certificate=$this->input->post('document_origin_certificate');
+					$document->shipment_advice=$this->input->post('document_shipment_advice');
+					$document->controller_letter=$this->input->post('document_controller_letter');
+					$document->fumigation_letter=$this->input->post('document_fumigation_letter');
 				
 					$token=$this->input->post('token');
 					/*************************/

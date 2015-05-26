@@ -19,7 +19,6 @@ class Authorize extends CI_Model {
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
 		$result = json_decode(curl_exec($ch));
-		
 		return $result->status;
 	}
 }

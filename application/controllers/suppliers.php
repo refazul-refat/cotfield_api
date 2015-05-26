@@ -175,16 +175,13 @@ class Suppliers extends CI_Controller {
 		
 		/********************************/
 		/* Section 4 - Prepare Response */
-		$this->db->select('id,name');
+		$this->db->select('name');
 		$this->db->from('suppliers');
 		$suppliers=$this->db->get()->result();
-		$response=new stdClass;
+		$response=array();
 		
 		foreach($suppliers as &$supplier){
-			$value=$supplier->id;
-			$caption=new stdClass;
-			$caption->caption=$supplier->name;
-			$response->$value=$caption;
+			$response[]=$supplier->name;
 		}
 		/********************************/
 		

@@ -26,6 +26,12 @@ class Customer extends CI_Model {
     }
     public function create($data){
 		//Creates a customer
+		$this->db->select('id');
+		$this->db->from('customers');
+		$this->db->where('name',$data->name);
+		$result=$this->db->get()->row();
+		if($result)return $result->id;
+		
 		$this->db->insert('customers',$data);
 		return $this->db->insert_id();
 	}

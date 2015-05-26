@@ -185,16 +185,13 @@ class Customers extends CI_Controller {
 		
 		/********************************/
 		/* Section 4 - Prepare Response */
-		$this->db->select('id,name');
+		$this->db->select('name');
 		$this->db->from('customers');
 		$customers=$this->db->get()->result();
-		$response=new stdClass;
+		$response=array();
 		
 		foreach($customers as &$customer){
-			$value=$customer->id;
-			$caption=new stdClass;
-			$caption->caption=$customer->name;
-			$response->$value=$caption;
+			$response[]=$customer->name;
 		}
 		/********************************/
 		

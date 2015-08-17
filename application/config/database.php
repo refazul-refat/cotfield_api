@@ -49,8 +49,8 @@ $active_group = 'default';
 $active_record = TRUE;
 
 $db['default']['hostname'] = 'localhost';
-$db['default']['username'] = 'refazul';
-$db['default']['password'] = 'zxcvbnm';
+$db['default']['username'] = 'diaryrpa_maroof';
+$db['default']['password'] = 'KidsAndParentsCare';
 $db['default']['database'] = 'cotfield_api';
 $db['default']['dbdriver'] = 'mysql';
 $db['default']['dbprefix'] = '';

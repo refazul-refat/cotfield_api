@@ -1,16 +1,16 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 class Nodes extends CI_Controller {
-	
+
 	public function index(){
 		header("Access-Control-Allow-Origin: *");
-		
+
 		$id=$this->uri->segment(2,FALSE);
-		
+
 		if(!$id){
 			$id=$this->input->get_post('id');
 		}
-		
+
 		$this->db->select('*');
 		$this->db->from('tree');
 		$this->db->where('parent',$id);
@@ -21,7 +21,7 @@ class Nodes extends CI_Controller {
 				$this->db->select('name');
 				$this->db->from($item->item_type.'s');
 				$this->db->where('id',$item->item_id);
-				
+
 				$item->name=$this->db->get()->row()->name;
 				$item->isParent=true;
 			}

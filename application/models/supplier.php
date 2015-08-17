@@ -13,19 +13,25 @@ class Supplier extends CI_Model {
     	$this->db->from('tree');
     	$this->db->where('item_type','project');
     	$this->db->where('item_id',$project_id);
-    	
+
     	$id=$this->db->get()->row()->id;
-    	
+
     	$this->db->where('item_type','supplier');
     	$this->db->where('parent',$id);
     	$this->db->delete('tree');
-    	
+
     	if($this->db->insert('tree',array('item_type'=>'supplier','parent'=>$id,'item_id'=>$supplier_id)))
     		return true;
     	return false;
     }
     public function create($data){
 		//Creates a supplier
+      $this->db->select('id');
+		$this->db->from('suppliers');
+		$this->db->where('name',$data->name);
+		$result=$this->db->get()->row();
+		if($result)return $result->id;
+
 		$this->db->insert('suppliers',$data);
 		return $this->db->insert_id();
 	}
@@ -34,7 +40,7 @@ class Supplier extends CI_Model {
 		$this->db->select('*');
 		$this->db->from('suppliers');
 		$this->db->where('id',$supplier_id);
-		
+
 		$supplier=$this->db->get()->row();
 		if(count($supplier)>0)
 			return $supplier;

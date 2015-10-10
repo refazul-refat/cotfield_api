@@ -6,9 +6,11 @@ class Request extends CI_Model {
         // Call the Model constructor
         parent::__construct();
     }
-    
+
     public function dispatch($action,$token){
-		
+
+      return true;
+
 		$ch = curl_init();
 
 		curl_setopt($ch, CURLOPT_URL,base_url()."o/oauth2/consume");
@@ -19,7 +21,7 @@ class Request extends CI_Model {
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
 		$result = json_decode(curl_exec ($ch));
-		
+
 		if($result->status=='consumed' || $result->status=='savored'){
 			return true;
 		}

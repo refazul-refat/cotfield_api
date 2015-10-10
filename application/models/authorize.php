@@ -9,7 +9,7 @@ class Authorize extends CI_Model {
 
     public function client_can($action,$token){
 
-      return 'authoried';
+      return 'authorized';
 
 		$ch = curl_init();
 

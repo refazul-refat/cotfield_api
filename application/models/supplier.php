@@ -32,6 +32,11 @@ class Supplier extends CI_Model {
 		$result=$this->db->get()->row();
 		if($result)return $result->id;
 
+      $this->db->insert('folders',array('name'=>$data->name));
+      $id=$this->db->insert_id();
+      $this->db->insert('tree',array('item_id'=>$id,
+                                    'item_type'=>'folder',
+                                    'parent'=>0));
 		$this->db->insert('suppliers',$data);
 		return $this->db->insert_id();
 	}

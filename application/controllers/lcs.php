@@ -26,6 +26,8 @@ class Lcs extends CI_Controller {
 				$lc->opening_bank=$this->input->post('lc_opening_bank');
 				$lc->receiving_bank=$this->input->post('lc_receiving_bank');
 				$lc->copy=$this->input->post('lc_copy');
+				$lc->amendment_documents=$this->input->post('lc_amendment_documents');
+				$lc->amendment_date=$this->input->post('lc_amendment_date');
 				//$lc->maturity_notification=$this->input->post('lc_maturity_notification');
 
 				$token=$this->input->post('token');
@@ -67,6 +69,8 @@ class Lcs extends CI_Controller {
 					if($this->input->post('lc_opening_bank'))$lc->opening_bank=$this->input->post('lc_opening_bank');
 					if($this->input->post('lc_receiving_bank'))$lc->receiving_bank=$this->input->post('lc_receiving_bank');
 					if($this->input->post('lc_copy'))$lc->copy=$this->input->post('lc_copy');
+					if($this->input->post('lc_amendment_documents'))$lc->amendment_documents=$this->input->post('lc_amendment_documents');
+					if($this->input->post('lc_amendment_date'))$lc->amendment_date=$this->input->post('lc_amendment_date');
 					//if($this->input->post('lc_maturity_notification'))$lc->maturity_notification=$this->input->post('lc_maturity_notification');
 
 					$token=$this->input->post('token');

@@ -6,11 +6,7 @@ class Calculate extends CI_Controller {
 		echo json_encode($message);
 		die();
 	}
-	public function invoice_amount($pid){
-
-		header('Content-Type: application/json');
-		header("Access-Control-Allow-Origin: *");
-
+	public function invoice_amount_calculate($pid){
 		$this->db->select('*');
 		$this->db->from('tree');
 		$this->db->where('item_type','project');
@@ -40,10 +36,32 @@ class Calculate extends CI_Controller {
 				$controller=$this->db->get()->row();
 			}
 		}
-		if(strtolower($product->unit_quantity)==strtolower($controller->invoice_weight_unit)){
-			$this->respond(200,array('invoice_amount'=>$product->unit_price*$controller->invoice_weight,
-										'currency'=>$product->unit_price_currency));
+		// Product unit price is always in usc/lbs
+		// 1 mton=2204.62 lbs
+
+		$factor=2204.62;
+
+		// Default lbs
+		$controller_invoice_weight=$controller->invoice_weight;
+		if($controller->invoice_weight_unit=='mton'){
+			$controller_invoice_weight=$controller->invoice_weight * $factor;
 		}
+		else if($controller->invoice_weight_unit=='kgs'){
+			$controller_invoice_weight=$controller->invoice_weight * $factor / 1000;
+		}
+
+		$invoice_amount=$product->unit_price * $controller_invoice_weight;
+		$invoice_amount_usd=$invoice_amount / 100;
+
+		return array('code'=>200,'object'=>array('invoice_amount'=>$invoice_amount_usd,'currency'=>'USD'));
+	}
+	public function invoice_amount($pid){
+
+		header('Content-Type: application/json');
+		header("Access-Control-Allow-Origin: *");
+
+		$response=$this->invoice_amount_calculate($pid);
+		$this->respond($response['code'],$response['object']);
 	}
 	public function claim_weight($pid){
 		header('Content-Type: application/json');
@@ -79,7 +97,8 @@ class Calculate extends CI_Controller {
 			}
 		}
 		$claim_weight=$controller->invoice_weight-$controller->final_weight;
-		$claim_amount=$claim_weight*$product->unit_price;
+		$claim_amount=$claim_weight * $product->unit_price;
+
 		$this->respond(200,array('claim_weight'=>$claim_weight,
 							'claim_weight_unit'=>$controller->invoice_weight_unit,
 							'claim_amount'=>$claim_amount,
@@ -125,8 +144,11 @@ class Calculate extends CI_Controller {
 				$controller=$this->db->get()->row();
 			}
 		}
-		$commission_amount=$controller->invoice_weight*$contract->commission_rate/100;
-		$this->respond(200,array('commission_amount'=>$commission_amount,
-							'commission_amount_currecny'=>$product->unit_price_currency));
+		$response=$this->invoice_amount_calculate($pid);
+
+		$invoice_amount_usd=$response['object']['invoice_amount'];
+		$commission_amount_usd=$invoice_amount_usd * $contract->commission_rate / 100;
+		$this->respond(200,array('commission_amount'=>$commission_amount_usd,
+							'commission_amount_currecny'=>'USD'));
 	}
 }

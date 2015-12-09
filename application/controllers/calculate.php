@@ -96,13 +96,34 @@ class Calculate extends CI_Controller {
 				$controller=$this->db->get()->row();
 			}
 		}
-		$claim_weight=$controller->invoice_weight-$controller->final_weight;
+		$factor=2204.62;
+
+		// Default lbs
+		$controller_invoice_weight=$controller->invoice_weight;
+		if($controller->invoice_weight_unit=='mton'){
+			$controller_invoice_weight=$controller->invoice_weight * $factor;
+		}
+		else if($controller->invoice_weight_unit=='kgs'){
+			$controller_invoice_weight=$controller->invoice_weight * $factor / 1000;
+		}
+
+		// Default lbs
+		$controller_final_weight=$controller->final_weight;
+		if($controller->final_weight_unit=='mton'){
+			$controller_final_weight=$controller->final_weight * $factor;
+		}
+		else if($controller->final_weight_unit=='kgs'){
+			$controller_final_weight=$controller->final_weight * $factor / 1000;
+		}
+
+		$claim_weight=$controller_invoice_weight-$controller_final_weight;
 		$claim_amount=$claim_weight * $product->unit_price;
+		$claim_amount_usd=$claim_amount / 100;
 
 		$this->respond(200,array('claim_weight'=>$claim_weight,
-							'claim_weight_unit'=>$controller->invoice_weight_unit,
-							'claim_amount'=>$claim_amount,
-							'claim_amount_currency'=>$product->unit_price_currency));
+							'claim_weight_unit'=>'lbs',
+							'claim_amount'=>$claim_amount_usd,
+							'claim_amount_currency'=>'USD'));
 	}
 	public function commission_amount($pid){
 		header('Content-Type: application/json');

@@ -43,6 +43,27 @@ class Projects extends CI_Controller {
 						$this->respond(204,array());
 					}
 				}
+				else if($this->input->post('method')=='update'){
+					$project=new stdClass;
+					if($this->input->post('project_name'))$project->name=$this->input->post('project_name');
+					if($this->input->post('project_description'))$project->description=$this->input->post('project_description');
+
+					$this->db->select('*');
+					$this->db->from('projects');
+					$this->db->where('id',$project_id);
+
+					$db_project=$this->db->get()->row();
+					if(count($db_project)>0){
+						$db_project->name=$project->name;
+						$db_project->description=$project->description;
+
+						unset($db_project->id);
+						$this->db->where('id',$project_id);
+						$this->db->update('projects',$db_project);
+					}
+
+					$this->respond(200,array('project'=>array('name'=>$project->name,'description'=>$project->description)));
+				}
 				else{
 					$class=$this->uri->segment(3,FALSE);
 					if(!$class)die();

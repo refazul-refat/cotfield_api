@@ -72,8 +72,8 @@ class Products extends CI_Controller {
 					if($this->input->post('product_unit_price'))$product->unit_price=$this->input->post('product_unit_price');
 					if($this->input->post('product_unit_price_currency'))$product->unit_price_currency=$this->input->post('product_unit_price_currency');
 					if($this->input->post('product_pi_document'))$product->pi_document=$this->input->post('product_pi_document');
-					if($this->input->post('product_pi_date'))$product->pi_date=$this->input->post('product_pi_date');
-					if($this->input->post('product_pi_no'))$product->pi_no=$this->input->post('product_pi_no');
+					$product->pi_date=$this->input->post('product_pi_date');
+					$product->pi_no=$this->input->post('product_pi_no');
 
 					$token=$this->input->post('token');
 					/*************************/

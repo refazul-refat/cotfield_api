@@ -37,9 +37,9 @@ class Calculate extends CI_Controller {
 			}
 		}
 		// Product unit price is always in usc/lbs
-		// 1 mton=2204.62 lbs
+		// 1 mton=2204.6 lbs
 
-		$factor=2204.62;
+		$factor=2204.6;
 
 		// Default lbs
 		$controller_invoice_weight=$controller->invoice_weight;
@@ -96,7 +96,7 @@ class Calculate extends CI_Controller {
 				$controller=$this->db->get()->row();
 			}
 		}
-		$factor=2204.62;
+		$factor=2204.6;
 
 		// Default lbs
 		$controller_invoice_weight=$controller->invoice_weight;
@@ -206,7 +206,7 @@ class Calculate extends CI_Controller {
 				$contract=$this->db->get()->row();
 			}
 		}
-		$factor=2204.62;
+		$factor=2204.6;
 
 		// Default lbs
 		$controller_invoice_weight=$controller->invoice_weight;

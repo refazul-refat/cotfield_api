@@ -28,6 +28,8 @@ class Transshipments extends CI_Controller {
 				$transshipment->date=$this->input->post('transshipment_date');
 				$transshipment->port=$this->input->post('transshipment_port');
 				$transshipment->number_of_container=$this->input->post('transshipment_number_of_container');
+				$transshipment->truck_load_date=$this->input->post('transshipment_truck_load_date');
+				$transshipment->number_of_bales=$this->input->post('transshipment_number_of_bales');
 				//$transshipment->buyer_notification=$this->input->post('transshipment_buyer_notification');
 
 				$token=$this->input->post('token');
@@ -69,6 +71,8 @@ class Transshipments extends CI_Controller {
 					$transshipment->date=$this->input->post('transshipment_date');
 					$transshipment->port=$this->input->post('transshipment_port');
 					$transshipment->number_of_container=$this->input->post('transshipment_number_of_container');
+					$transshipment->truck_load_date=$this->input->post('transshipment_truck_load_date');
+					$transshipment->number_of_bales=$this->input->post('transshipment_number_of_bales');
 
 					$token=$this->input->post('token');
 					/*************************/

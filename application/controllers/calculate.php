@@ -169,7 +169,56 @@ class Calculate extends CI_Controller {
 
 		$invoice_amount_usd=$response['object']['invoice_amount'];
 		$commission_amount_usd=$invoice_amount_usd * $contract->commission_rate / 100;
+
+		$point_value=$this->point_value($pid);
+		$commission_amount_usd+=$point_value;
+
 		$this->respond(200,array('commission_amount'=>$commission_amount_usd,
 							'commission_amount_currecny'=>'USD'));
+	}
+	function point_value($pid){
+		$this->db->select('*');
+		$this->db->from('tree');
+		$this->db->where('item_type','project');
+		$this->db->where('item_id',$pid);
+
+		$parent=$this->db->get()->row()->id;
+
+		$this->db->select('*');
+		$this->db->from('tree');
+		$this->db->where('parent',$parent);
+
+		$results=$this->db->get()->result();
+
+		foreach($results as $result){
+			if($result->item_type=='controller'){
+				$this->db->select('invoice_weight,invoice_weight_unit');
+				$this->db->from('controllers');
+				$this->db->where('id',$result->item_id);
+
+				$controller=$this->db->get()->row();
+			}
+			else if($result->item_type=='contract'){
+				$this->db->select('point_per10k');
+				$this->db->from('contracts');
+				$this->db->where('id',$result->item_id);
+
+				$contract=$this->db->get()->row();
+			}
+		}
+		$factor=2204.62;
+
+		// Default lbs
+		$controller_invoice_weight=$controller->invoice_weight;
+		if($controller->invoice_weight_unit=='mton'){
+			$controller_invoice_weight=$controller->invoice_weight * $factor;
+		}
+		else if($controller->invoice_weight_unit=='kgs'){
+			$controller_invoice_weight=$controller->invoice_weight * $factor / 1000;
+		}
+
+		$contract_point_per10k=$contract->point_per10k;
+
+		return $controller_invoice_weight * $contract_point_per10k / 10000;
 	}
 }

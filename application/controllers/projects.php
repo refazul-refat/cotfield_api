@@ -176,13 +176,16 @@ class Projects extends CI_Controller {
 						$this->db->where('item_type','shipment');
 						$this->db->where('parent',$parent);
 
-						$result->shipment_id=$this->db->get()->row()->item_id;
+						$s=$this->db->get()->row();
+						if($s){
+							$result->shipment_id=$s->item_id;
 
-						$this->db->select('*');
-						$this->db->from('shipments');
-						$this->db->where('id',$result->shipment_id);
+							$this->db->select('*');
+							$this->db->from('shipments');
+							$this->db->where('id',$result->shipment_id);
 
-						$result->shipment=$this->db->get()->row();
+							$result->shipment=$this->db->get()->row();
+						}
 						//
 
 						$this->db->select('*');
